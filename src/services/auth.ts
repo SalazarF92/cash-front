@@ -1,16 +1,28 @@
 import { IUser } from "@/interfaces/user";
 import { get, post } from "./api";
 import jwtDecode from "jwt-decode";
-import { getCookie, setCookie, deleteCookie} from 'cookies-next'
+import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import { errorMessages } from "@/helpers/messages";
 
 class AuthService {
+  async create(username: string, password: string) {
+    try {
+      const { data } = await post("/user/create", { username, password });
+      return data;
+    } catch (error) {
+      const result = errorMessages(error.response.data.message);
+      console.log(result);
+      return result;
+    }
+  }
+
   async login(username: string, password: string) {
     try {
       const { data } = await post("/user/login", { username, password });
       await authService.setToken(data);
       return data;
     } catch (error) {
-      return error.message;
+      return errorMessages(error.response.data.message);
     }
   }
 

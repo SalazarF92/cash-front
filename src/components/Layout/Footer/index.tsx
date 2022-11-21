@@ -1,9 +1,25 @@
+import Link from "next/link";
+import styled from "styled-components";
+
+const Container = styled.div`
+  width: 100%;
+  background: linear-gradient(180deg, #1a202c 10%, #2d3748 100%);
+  padding: 20px;
+  align-items: center;
+`;
+
 export default function Header() {
-    return (
-        <header className="bg-gray-100">
-        <div className="container mx-auto py-4">
-            <h1 className="text-3xl w-64 font-bold bg-blue-500">Hello footer!</h1>
-        </div>
-        </header>
-    );
+  return (
+    <Container>
+      <div className="flex flex-col items-center">
+        <span>Todos os direitos reservados ©2022</span>
+        <Link
+          className="hover:underline hover:text-blue-400"
+          href="https://www.linkedin.com/in/flavio-r-salazar/"
+        >
+          LinkedIn
+        </Link>
+      </div>
+    </Container>
+  );
 }

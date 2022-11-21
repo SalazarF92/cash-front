@@ -1,28 +1,42 @@
 import { authService } from "@/services/auth";
+import Image from "next/image";
 import styled from "styled-components";
 
 const Container = styled.div`
   width: 100%;
-  height: 60px;
-  background-color: #1a202c;
+  //background color with linear gradient
+  background: linear-gradient(180deg,#2d3748 10%,  #1a202c  100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+
 `;
 export default function Header() {
+  const token = authService.getToken();
+
   async function logout() {
     await authService.logout();
     window.location.reload();
   }
+
   return (
-    <Container className="bg-gray-100">
-      <div className="container mx-auto py-4">
-        <h1 className="text-3xl w-64 font-bold bg-blue-500">Hello Header!</h1>
+    <Container className="">
+      <div className="">
+        <Image
+          src={"/assets/images/logo_nobg.png"}
+          width={100}
+          height={100}
+          alt="logo"
+        />
       </div>
-      <button className="bg-blue-500" onClick={logout}>
-        Logout
-      </button>
+      {token ? (
+        <button
+          className="text-xl hover:underline hover:text-blue-600"
+          onClick={logout}
+        >
+          Logout
+        </button>
+      ) : null}
     </Container>
   );
 }

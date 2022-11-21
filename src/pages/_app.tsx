@@ -7,7 +7,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={new QueryClient()}>
       <DefaultLayout>
-        <Component {...pageProps} />)
+        <Component {...pageProps} />
       </DefaultLayout>
     </QueryClientProvider>
   );

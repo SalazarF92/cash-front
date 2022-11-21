@@ -4,22 +4,20 @@ import Footer from "./Footer";
 import Header from "./Header";
 
 const Container = styled.div`
-  width: 100%;
-  height: 960px;
   background-color: #1a202c;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
 `;
 
-
-export default function DefaultLayout({ children }: { children: react.ReactNode }) {
+export default function DefaultLayout({
+  children,
+}: {
+  children: react.ReactNode;
+}) {
   return (
-    <Container>
+    <Container className="">
       <Header />
-      {children}
+      <div className="min-h-screen flex flex-1 flex-col justify-center items-center">
+        {children}
+      </div>
       <Footer />
     </Container>
   );
