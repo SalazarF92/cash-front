@@ -1,4 +1,3 @@
-import useNotification from "@/hooks/useNotifications";
 import { authService } from "@/services/auth";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -13,7 +12,7 @@ const Container = styled.div`
   /* border: 1px solid white; */
 
   @media (min-width: 768px) {
-    grid-template-columns: 540px minmax(0, 15rem);
+    grid-template-columns: 540px minmax(0, 20rem);
   }
 
   .money {
@@ -101,13 +100,15 @@ export default function Login() {
                 type="password"
                 name="password"
               />
-              {messages
-                ? messages?.map((message, index) => (
-                    <div key={index} className="text-red-500">
+              {messages ? (
+                <div className="mt-2 gap-2 flex flex-col">
+                  {messages?.map((message, index) => (
+                    <div key={index} className="text-sm text-red-500">
                       {message}
                     </div>
-                  ))
-                : null}
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="flex justify-around items-center">
