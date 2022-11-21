@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_URL } from "@/settings";
+import { authService } from "./auth";
 
 export async function get<T = unknown>(
   url: AxiosRequestConfig["url"],
@@ -44,6 +45,7 @@ async function request<T = any>(
         baseURL: API_URL,
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authService.getToken()}`,
         },
       });
     };

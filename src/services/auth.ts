@@ -1,14 +1,14 @@
 import { IUser } from "@/interfaces/user";
 import { get, post } from "./api";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import jwtDecode from "jwt-decode";
+import { getCookie, setCookie, deleteCookie} from 'cookies-next'
 
 class AuthService {
-  
   async login(username: string, password: string) {
     try {
       const { data } = await post("/user/login", { username, password });
-      authService.setToken(data);
+      await authService.setToken(data);
+      return data;
     } catch (error) {
       return error.message;
     }
@@ -18,7 +18,7 @@ class AuthService {
     authService.deleteToken();
   }
 
-  public setToken(token: string) {
+  async setToken(token: string) {
     return new Promise((resolve, reject) => {
       try {
         const expirationDate = new Date((jwtDecode(token) as any).exp * 1000);
@@ -26,8 +26,6 @@ class AuthService {
         setCookie("token", token, {
           expires: expirationDate,
         });
-        localStorage.setItem("token", token);
-
         resolve(token);
       } catch (error) {
         reject(error);
@@ -36,17 +34,17 @@ class AuthService {
   }
 
   public getToken() {
-    return getCookie("token");
+    const result = getCookie("token");
+    return result;
   }
 
   public async me(): Promise<IUser> {
-    const result = await get("/auth/me");
+    const result = await get("/user/me");
 
     return result.data as IUser;
   }
 
   public deleteToken() {
-    localStorage.removeItem("token");
     deleteCookie("token");
   }
 }
