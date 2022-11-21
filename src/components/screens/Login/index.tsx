@@ -111,9 +111,9 @@ export default function Login() {
               ) : null}
             </div>
           </div>
-          <div className="flex justify-around items-center">
+          <div className="flex justify-between items-center">
             <div
-              className="w-full text-sm hover:underline cursor-pointer"
+              className="text-sm hover:underline cursor-pointer"
               onClick={() => {
                 setRegister(!register);
                 setMessages(null);

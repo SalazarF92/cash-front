@@ -4,4 +4,5 @@ export interface ITransaction extends IBase {
   debitedAccount: string;
   creditedAccount: string;
   value: number;
+  createdAt: Date;
 }
