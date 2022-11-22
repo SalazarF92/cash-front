@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import { authService } from "@/services/auth";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -121,13 +122,7 @@ export default function Login() {
             >
               {register ? "Já tem uma conta?" : "Criar conta"}
             </div>
-
-            <button
-              className="w-32 h-8 bg-blue-800 hover:bg-[#112873] rounded-r-2xl"
-              type="submit"
-            >
-              {create ? "Create" : "Login"}
-            </button>
+            <Button text={create ? "Create" : "Login"} type="submit" />
           </div>
         </div>
       </form>

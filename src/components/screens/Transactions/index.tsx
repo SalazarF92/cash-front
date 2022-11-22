@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import { accountService } from "@/services/account";
 import { authService } from "@/services/auth";
 import { transactionService } from "@/services/transaction";
@@ -8,7 +9,7 @@ import styled from "styled-components";
 const Container = styled.div`
   grid-template-columns: minmax(0, 1fr);
   background-color: transparent;
-  border-radius: 5px;
+  /* border-radius: 15px; */
   box-shadow: 1.4px 1.8px 1.8px rgba(0, 0, 0, 0.053),
     3.6px 4.4px 4.4px rgba(0, 0, 0, 0.075), 7.4px 9px 9px rgba(0, 0, 0, 0.095),
     15.3px 18.6px 18.6px rgba(0, 0, 0, 0.117),
@@ -20,7 +21,7 @@ const Container = styled.div`
 `;
 
 export default function Transactions() {
-  const [type, setTypes] = useState("debitedAccount");
+  const [type, setTypes] = useState("creditedAccount");
 
   const results = useQueries({
     queries: [
@@ -39,7 +40,9 @@ export default function Transactions() {
     ],
   });
 
-  console.log(results);
+  const transactions = results[0].data;
+  const account = results[2].data;
+
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -48,33 +51,45 @@ export default function Transactions() {
   const Form = () => {
     return (
       <form onSubmit={submit}>
-        <div className="grid mt-2 bg-gray-500">
-          <div className="grid-cols-2">
-            <div className="">
-              <label className="block text-gray-700 text-sm font-bold ">
-                Base Account
-              </label>
-              <select name="debitedAccount" className="indent-2">
-                <option value={type}>{results[2]?.data?.username}</option>
-              </select>
-            </div>
-            <div className="">
-              <label className="block text-gray-700 text-sm font-bold ">
-                Amount
-              </label>
-              <input type="number" name="amount" className="indent-2" />
-            </div>
+        <div className="grid p-2">
+          <span className="text-xl text-center">Transfer</span>
+          <div className="grid grid-cols-3 gap-5">
+            <label className="block col-span-2 text-gray-200 text-sm font-bold ">
+              Base Account
+            </label>
+            <label className="block text-gray-200 text-sm font-bold ">
+              Amount
+            </label>
           </div>
-          <label className="block text-gray-700 text-sm font-bold mt-2">
+          <div className="grid grid-cols-3 gap-5">
+            <select
+              name="debitedAccount"
+              className="col-span-2 indent-2 bg-[#2b2e46] rounded-md"
+            >
+              <option value={type}>{results[2]?.data?.username}</option>
+            </select>
+            <input
+              type="number"
+              name="amount"
+              className="indent-2 bg-[#2b2e46] rounded-md"
+            />
+          </div>
+          <label className="block text-gray-200 text-sm font-bold mt-2">
             Account to Deposit
           </label>
-          <select name="creditedAccount" className="indent-2">
+          <select
+            name="creditedAccount"
+            className="indent-2 bg-[#2b2e46] rounded-md"
+          >
             {results[1]?.data?.map((account) => (
               <option key={account.id} value={account.id}>
                 {account.id}
               </option>
             ))}
           </select>
+          <div className="w-full flex justify-end mt-3">
+            <Button text="Send" type="submit" />
+          </div>
         </div>
       </form>
     );
@@ -82,28 +97,41 @@ export default function Transactions() {
 
   return (
     <Container className="grid grid-cols-2 md:min-h-[30rem]">
-      {/* <div className="flex flex-col gap-2 mt-2"> */}
-      {/* <h1 className="w-full text-xl text-center">Transactions</h1> */}
-      <div className="border-white">
-        <div className="grid grid-cols-4">
-          <div className="col-span-2">Transaction Id</div>
-          <div className="">Credited Account</div>
-          <div className="">Transaction Date</div>
-        </div>
-        {results[0]?.data?.map((transaction, index) => (
-          <div
-            key={index}
-            className={`grid grid-cols-4 border-r-2 border-l-2 border-b-2 
-            ${index == 0 ? "border-t-2" : ""} ${
-              index % 2 == 0 ? "bg-blue-500" : "bg-blue-800"
-            }
-            `}
-          >
-            <div className="col-span-2">{transaction.id}</div>
-            <div>{transaction.creditedAccount}</div>
-            <div>{transaction.debitedAccount}</div>
+      <div className="">
+        {transactions?.length > 0 ? (
+          <div className="grid grid-cols-5">
+            <div className="col-span-2">Transaction Id</div>
+            <div className="">Credited Account</div>
+            <div className="">Transaction Date</div>
+            <div className="text-center">Amount</div>
           </div>
-        ))}
+        ) : (
+          <div className="w-full h-full border-gray-600 text-2xl flex items-center justify-center bg-transparent border-2">
+            No transactions avaliable...
+          </div>
+        )}
+
+        {transactions?.length > 0 ? (
+          transactions?.map((transaction, index) => (
+            <div
+              key={index}
+              className={`grid grid-cols-5 border-gray-600 ${account.accountId == transaction.debitedAccount ? 'text-red-600' : 'text-green-600'} border-r-2 border-l-2 border-b-2 place-items-center
+            ${index == 0 ? "border-t-2" : ""} ${
+                index % 2 == 0 ? "bg-[#10141c]" : "bg-[#2c374d]"
+              }
+            `}
+            >
+              <div className="col-span-2">{transaction.id}</div>
+              <div>{transaction.creditedAccount}</div>
+              <div>{transaction.debitedAccount}</div>
+              <div>{transaction.value}</div>
+            </div>
+          ))
+        ) : (
+          <div className="w-full text-2xl h-full flex items-center justify-center">
+            No transactions avaliable...
+          </div>
+        )}
       </div>
       <Form />
     </Container>
