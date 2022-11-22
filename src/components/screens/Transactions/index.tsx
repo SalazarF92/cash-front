@@ -3,7 +3,7 @@ import { accountService } from "@/services/account";
 import { authService } from "@/services/auth";
 import { transactionService } from "@/services/transaction";
 import { useQueries } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -21,12 +21,15 @@ const Container = styled.div`
 `;
 
 export default function Transactions() {
-  const [type, setTypes] = useState("creditedAccount");
+  const [type, setType] = useState("creditedAccount");
+  const [disable, setDisable] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [order, setOrder] = useState('asc');
 
   const results = useQueries({
     queries: [
       {
-        queryKey: ["transactions", 1],
+        queryKey: ["transactions", [type, order]],
         queryFn: () => transactionService.get(type),
       },
       {
@@ -40,19 +43,59 @@ export default function Transactions() {
     ],
   });
 
-  const transactions = results[0].data;
-  const account = results[2].data;
+  const transactions = results[0]?.data;
+  const account = results[2]?.data;
 
-
-  function submit(e: React.FormEvent<HTMLFormElement>) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (disable) return;
+    const amount = e.currentTarget.amount.value;
+    const debitedAccount = e.currentTarget.debitedAccount.value;
+    const creditedAccount = e.currentTarget.creditedAccount.value;
+
+    setDisable(true);
+    const data = await transactionService.create(
+      debitedAccount,
+      creditedAccount,
+      amount
+    );
+    if (data?.errors) {
+      setMessages(data?.errors);
+      setDisable(false);
+      return;
+    }
+    setDisable(false);
+    window.location.reload();
+  }
+
+  //convert date format to dd/mm/yyyy hh:mm:ss
+  function formatDate(date: string) {
+    const d = new Date(date);
+    const day = d.getDate();
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const hour = d.getHours();
+    const minute = d.getMinutes();
+    return `${day}/${month}/${year} ${hour}:${
+      minute < 10 ? "0" + minute : minute
+    }`;
+  }
+
+  function sortByDate(array: any[], order: string) {
+    return order == "asc"
+      ? array?.sort((a, b) => {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        })
+      : array?.sort((a, b) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
   }
 
   const Form = () => {
     return (
       <form onSubmit={submit}>
         <div className="grid p-2">
-          <span className="text-xl text-center">Transfer</span>
+          <span className="text-xl text-center mb-2">Transfer</span>
           <div className="grid grid-cols-3 gap-5">
             <label className="block col-span-2 text-gray-200 text-sm font-bold ">
               Base Account
@@ -65,8 +108,11 @@ export default function Transactions() {
             <select
               name="debitedAccount"
               className="col-span-2 indent-2 bg-[#2b2e46] rounded-md"
+              defaultValue={account?.accountId}
             >
-              <option value={type}>{results[2]?.data?.username}</option>
+              <option value={account?.accountId}>
+                {results[2]?.data?.username}
+              </option>
             </select>
             <input
               type="number"
@@ -87,6 +133,19 @@ export default function Transactions() {
               </option>
             ))}
           </select>
+          {messages ? (
+            <div className="mt-2 gap-2 flex flex-col">
+              {messages?.map((message, index) => (
+                <div
+                  onClick={() => setMessages(null)}
+                  key={index}
+                  className="text-sm text-red-500 cursor-pointer"
+                >
+                  {message}
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="w-full flex justify-end mt-3">
             <Button text="Send" type="submit" />
           </div>
@@ -95,13 +154,41 @@ export default function Transactions() {
     );
   };
 
+  const Filters = () => {
+    return (
+      <div className="grid p-2">
+        <span className="text-center text-xl mb-2">Filter By</span>
+        <div className="grid grid-cols-2 gap-5">
+          <span className="">Transaction Type</span>
+          <span className="">Date</span>
+        </div>
+        <div className="grid grid-cols-2 gap-5">
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="indent-2 bg-[#2b2e46] rounded-md"
+          >
+            <option value="creditedAccount">Cash In</option>
+            <option value="debitedAccount">Cash Out</option>
+            <option value="all">All</option>
+          </select>
+          <select value={order} onChange={(e) => setOrder(e.target.value)} className="indent-2 bg-[#2b2e46] rounded-md">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Container className="grid grid-cols-2 md:min-h-[30rem]">
       <div className="">
         {transactions?.length > 0 ? (
-          <div className="grid grid-cols-5">
-            <div className="col-span-2">Transaction Id</div>
-            <div className="">Credited Account</div>
+          <div className="grid grid-cols-6">
+            <div className="col-span-2 ml-2">Transaction Id</div>
+            <div className="">Credited</div>
+            <div className="">Debited</div>
             <div className="">Transaction Date</div>
             <div className="text-center">Amount</div>
           </div>
@@ -111,29 +198,42 @@ export default function Transactions() {
           </div>
         )}
 
-        {transactions?.length > 0 ? (
-          transactions?.map((transaction, index) => (
-            <div
-              key={index}
-              className={`grid grid-cols-5 border-gray-600 ${account.accountId == transaction.debitedAccount ? 'text-red-600' : 'text-green-600'} border-r-2 border-l-2 border-b-2 place-items-center
+        {transactions?.length > 0
+          ? sortByDate(transactions, order)?.map((transaction, index) => (
+              <div
+                key={index}
+                className={`grid grid-cols-6 border-gray-600 ${
+                  account?.accountId == transaction?.debitedAccount
+                    ? "text-red-600"
+                    : "text-green-600"
+                } border-r-2 border-l-2 border-b-2 place-items-center
             ${index == 0 ? "border-t-2" : ""} ${
-                index % 2 == 0 ? "bg-[#10141c]" : "bg-[#2c374d]"
-              }
+                  index % 2 == 0 ? "bg-[#10141c]" : "bg-[#2c374d]"
+                }
             `}
-            >
-              <div className="col-span-2">{transaction.id}</div>
-              <div>{transaction.creditedAccount}</div>
-              <div>{transaction.debitedAccount}</div>
-              <div>{transaction.value}</div>
-            </div>
-          ))
-        ) : (
-          <div className="w-full text-2xl h-full flex items-center justify-center">
-            No transactions avaliable...
-          </div>
-        )}
+              >
+                <div className="col-span-2 ml-2">{transaction.id}</div>
+                <div>{transaction.creditedAccount}</div>
+                <div>{transaction.debitedAccount}</div>
+                <div>{formatDate(String(transaction.createdAt))}</div>
+                <div>{transaction.value}</div>
+              </div>
+            ))
+          : null}
       </div>
-      <Form />
+      <div className="">
+        <div className="flex p-2 text-2xl justify-around">
+          <span>Current Balance</span>
+          <span className={`${25 > 0 ? "text-green-500" : "text-gray-400"}`}>
+            {new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(25000)}
+          </span>
+        </div>
+        <Form />
+        <Filters />
+      </div>
     </Container>
   );
 }

@@ -11,7 +11,6 @@ class AuthService {
       return data;
     } catch (error) {
       const result = errorMessages(error.response.data.message);
-      console.log(result);
       return result;
     }
   }
@@ -56,7 +55,7 @@ class AuthService {
     return result.data as IUser;
   }
 
-  public deleteToken() {
+  deleteToken() {
     deleteCookie("token");
   }
 }

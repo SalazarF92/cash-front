@@ -8,9 +8,8 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
+const token = authService.getToken();
 export default function Header() {
-  const token = authService.getToken();
-
   async function logout() {
     await authService.logout();
     window.location.reload();

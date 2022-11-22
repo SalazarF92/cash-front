@@ -8,7 +8,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-export default function Header() {
+export default function Footer() {
   return (
     <Container>
       <div className="flex flex-col items-center">
