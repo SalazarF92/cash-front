@@ -24,7 +24,7 @@ export default function Transactions() {
   const [type, setType] = useState("creditedAccount");
   const [disable, setDisable] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [order, setOrder] = useState('asc');
+  const [order, setOrder] = useState("asc");
 
   const results = useQueries({
     queries: [
@@ -45,6 +45,7 @@ export default function Transactions() {
 
   const transactions = results[0]?.data;
   const account = results[2]?.data;
+
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -84,11 +85,22 @@ export default function Transactions() {
   function sortByDate(array: any[], order: string) {
     return order == "asc"
       ? array?.sort((a, b) => {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         })
       : array?.sort((a, b) => {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         });
+  }
+
+  function formatAmount(amount: number) {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(amount);
   }
 
   const Form = () => {
@@ -128,8 +140,8 @@ export default function Transactions() {
             className="indent-2 bg-[#2b2e46] rounded-md"
           >
             {results[1]?.data?.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.id}
+              <option key={account?.id} value={account?.id}>
+                {account?.username}
               </option>
             ))}
           </select>
@@ -172,7 +184,11 @@ export default function Transactions() {
             <option value="debitedAccount">Cash Out</option>
             <option value="all">All</option>
           </select>
-          <select value={order} onChange={(e) => setOrder(e.target.value)} className="indent-2 bg-[#2b2e46] rounded-md">
+          <select
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            className="indent-2 bg-[#2b2e46] rounded-md"
+          >
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
@@ -189,7 +205,7 @@ export default function Transactions() {
             <div className="col-span-2 ml-2">Transaction Id</div>
             <div className="">Credited</div>
             <div className="">Debited</div>
-            <div className="">Transaction Date</div>
+            <div className="">Date</div>
             <div className="text-center">Amount</div>
           </div>
         ) : (
@@ -216,7 +232,7 @@ export default function Transactions() {
                 <div>{transaction.creditedAccount}</div>
                 <div>{transaction.debitedAccount}</div>
                 <div>{formatDate(String(transaction.createdAt))}</div>
-                <div>{transaction.value}</div>
+                <div>{formatAmount(transaction.value)}</div>
               </div>
             ))
           : null}
@@ -224,11 +240,12 @@ export default function Transactions() {
       <div className="">
         <div className="flex p-2 text-2xl justify-around">
           <span>Current Balance</span>
-          <span className={`${25 > 0 ? "text-green-500" : "text-gray-400"}`}>
-            {new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(25000)}
+          <span
+            className={`${
+              account?.account.balance > 0 ? "text-green-500" : "text-gray-400"
+            }`}
+          >
+            {formatAmount(account?.account.balance)}
           </span>
         </div>
         <Form />
