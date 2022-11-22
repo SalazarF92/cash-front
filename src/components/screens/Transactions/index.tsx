@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import { formatAmount, formatDate, sortByDate } from "@/helpers/utils";
 import { accountService } from "@/services/account";
 import { authService } from "@/services/auth";
 import { transactionService } from "@/services/transaction";
@@ -44,8 +45,7 @@ export default function Transactions() {
   });
 
   const transactions = results[0]?.data;
-  const account = results[2]?.data;
-
+  const ownerAccount = results[2]?.data;
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,40 +69,6 @@ export default function Transactions() {
     window.location.reload();
   }
 
-  //convert date format to dd/mm/yyyy hh:mm:ss
-  function formatDate(date: string) {
-    const d = new Date(date);
-    const day = d.getDate();
-    const month = d.getMonth() + 1;
-    const year = d.getFullYear();
-    const hour = d.getHours();
-    const minute = d.getMinutes();
-    return `${day}/${month}/${year} ${hour}:${
-      minute < 10 ? "0" + minute : minute
-    }`;
-  }
-
-  function sortByDate(array: any[], order: string) {
-    return order == "asc"
-      ? array?.sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        })
-      : array?.sort((a, b) => {
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        });
-  }
-
-  function formatAmount(amount: number) {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(amount);
-  }
-
   const Form = () => {
     return (
       <form onSubmit={submit}>
@@ -120,9 +86,9 @@ export default function Transactions() {
             <select
               name="debitedAccount"
               className="col-span-2 indent-2 bg-[#2b2e46] rounded-md"
-              defaultValue={account?.accountId}
+              defaultValue={ownerAccount?.accountId}
             >
-              <option value={account?.accountId}>
+              <option value={ownerAccount?.accountId}>
                 {results[2]?.data?.username}
               </option>
             </select>
@@ -219,7 +185,7 @@ export default function Transactions() {
               <div
                 key={index}
                 className={`grid grid-cols-6 border-gray-600 ${
-                  account?.accountId == transaction?.debitedAccount
+                  ownerAccount?.accountId == transaction?.debitedAccount
                     ? "text-red-600"
                     : "text-green-600"
                 } border-r-2 border-l-2 border-b-2 place-items-center
@@ -229,8 +195,18 @@ export default function Transactions() {
             `}
               >
                 <div className="col-span-2 ml-2">{transaction.id}</div>
-                <div>{transaction.creditedAccount}</div>
-                <div>{transaction.debitedAccount}</div>
+                {transaction.creditedAccount == ownerAccount?.accountId && (
+                  <>
+                    <div>{transaction.creditedUser}</div>
+                    <div>{transaction.debitedUser}</div>
+                  </>
+                )}
+                {transaction.debitedAccount == ownerAccount?.accountId && (
+                  <>
+                    <div>{transaction.creditedUser}</div>
+                    <div>{transaction.debitedUser}</div>
+                  </>
+                )}
                 <div>{formatDate(String(transaction.createdAt))}</div>
                 <div>{formatAmount(transaction.value)}</div>
               </div>
@@ -242,10 +218,12 @@ export default function Transactions() {
           <span>Current Balance</span>
           <span
             className={`${
-              account?.account.balance > 0 ? "text-green-500" : "text-gray-400"
+              ownerAccount?.account.balance > 0
+                ? "text-green-500"
+                : "text-gray-400"
             }`}
           >
-            {formatAmount(account?.account.balance)}
+            {formatAmount(ownerAccount?.account.balance)}
           </span>
         </div>
         <Form />
