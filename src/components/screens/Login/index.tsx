@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import useAuth from "@/components/hooks/useAuth";
 import { authService } from "@/services/auth";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -53,6 +54,8 @@ export default function Login() {
   const [messages, setMessages] = useState([]);
   const router = useRouter();
 
+  const { login } = useAuth();
+
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     const username = e.currentTarget.username.value;
     const password = e.currentTarget.password.value;
@@ -67,7 +70,7 @@ export default function Login() {
       setRegister(false);
       return;
     }
-    const data = await authService.login(username, password);
+    const data = await login(username, password);
     if (data?.errors) {
       setMessages(data?.errors);
     }

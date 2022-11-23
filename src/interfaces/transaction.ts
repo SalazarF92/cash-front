@@ -5,4 +5,5 @@ export interface ITransaction extends IBase {
   creditedAccount: string;
   value: number;
   createdAt: Date;
+  total: number;
 }

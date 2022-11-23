@@ -1,3 +1,4 @@
+import useAuth from "@/components/hooks/useAuth";
 import { authService } from "@/services/auth";
 import Image from "next/image";
 import styled from "styled-components";
@@ -10,15 +11,7 @@ const Container = styled.div`
 `;
 
 export default function Header() {
-  async function isLogged() {
-    const user = await authService.me();
-    return user.accountId
-  }
-
-  async function logout() {
-    await authService.logout();
-    window.location.reload();
-  }
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <Container className="">
@@ -31,7 +24,7 @@ export default function Header() {
           alt="logo"
         />
       </div>
-      {isLogged() ? (
+      {isAuthenticated ? (
         <button
           className="text-xl hover:underline hover:text-blue-600 mr-3"
           onClick={logout}

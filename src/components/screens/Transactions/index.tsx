@@ -5,9 +5,8 @@ import { accountService } from "@/services/account";
 import { authService } from "@/services/auth";
 import { transactionService } from "@/services/transaction";
 import { useQueries } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import { ArrowLeft, ArrowRight } from "iconoir-react";
 
 const Container = styled.div`
   grid-template-columns: minmax(0, 1fr);
@@ -29,7 +28,7 @@ export default function Transactions() {
   const [messages, setMessages] = useState([]);
   const [order, setOrder] = useState("asc");
   const [pageIndex, setPageIndex] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(10);
 
   const results = useQueries({
     queries: [
@@ -48,10 +47,6 @@ export default function Transactions() {
       },
     ],
   });
-
-  useEffect(() => {
-    console.log(pageIndex);
-  }, [pageIndex]);
 
   const transactions = results[0]?.data;
   const ownerAccount = results[2]?.data;
@@ -171,74 +166,10 @@ export default function Transactions() {
       </div>
     );
   };
-
-  const Pagination = () => {
-    const pages =
-      transactions?.length % limit == 0
-        ? Math.ceil(transactions?.length / limit)
-        : Math.floor(transactions?.length / limit) + 1;
-    const buttons = [];
-    for (let i = 1; i <= pages; i++) {
-      buttons.push(i);
-    }
-    console.log(transactions?.length);
-    console.log(buttons);
-    return (
-      <div className="grid p-2 mt-8">
-        <span className="text-center text-xl mb-2">Pagination</span>
-        <div className="w-full flex flex-col gap-5">
-          <span className="">Page</span>
-          <div className="flex w-full justify-around">
-            <ArrowLeft
-              className="cursor-pointer"
-              onClick={() =>
-                pageIndex > 1 ? setPageIndex(pageIndex - 1) : null
-              }
-            />
-            {buttons.map((button, index) =>
-              button + 1 >= pageIndex && button <= pageIndex + 1 ? (
-                <button
-                  key={index}
-                  onClick={() => setPageIndex(button)}
-                  className={`${
-                    button == pageIndex
-                      ? "bg-[#2b2e46] text-blue-500"
-                      : "bg-[#2b2e46] text-gray-500"
-                  } rounded-md w-24`}
-                >
-                  {button}
-                </button>
-              ) : null
-            )}
-            <ArrowRight
-              className="cursor-pointer"
-              onClick={() => {
-                pageIndex <= buttons.length - 1
-                  ? setPageIndex(pageIndex + 1)
-                  : null;
-                console.log("numbers", pageIndex, buttons.length);
-              }}
-            />
-          </div>
-          <span className="w-24">Limit</span>
-          <select
-            className="indent-2 w-24 bg-[#2b2e46] rounded-md"
-            defaultValue={limit}
-            onChange={(e) => setLimit(Number(e.target.value))}
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-          </select>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <Container className="grid grid-cols-2 md:min-h-[30rem]">
-      <div className="">
-        {transactions?.length > 0 ? (
+      <div className="md:max-h-[30rem] md:overflow-y-auto">
+        {transactions?.attributes.length > 0 ? (
           <div className="grid grid-cols-6">
             <div className="col-span-2 ml-2">Transaction Id</div>
             <div className="">Credited</div>
@@ -252,37 +183,39 @@ export default function Transactions() {
           </div>
         )}
 
-        {transactions?.length > 0
-          ? sortByDate(transactions, order)?.map((transaction, index) => (
-              <div
-                key={index}
-                className={`grid grid-cols-6 border-gray-600 ${
-                  ownerAccount?.accountId == transaction?.debitedAccount
-                    ? "text-red-600"
-                    : "text-green-600"
-                } border-r-2 border-l-2 border-b-2 place-items-center
+        {transactions?.attributes.length > 0
+          ? sortByDate(transactions?.attributes, order)?.map(
+              (transaction, index) => (
+                <div
+                  key={index}
+                  className={`grid grid-cols-6 border-gray-600 ${
+                    ownerAccount?.accountId == transaction?.debitedAccount
+                      ? "text-red-600"
+                      : "text-green-600"
+                  } border-r-2 border-l-2 border-b-2 place-items-center
             ${index == 0 ? "border-t-2" : ""} ${
-                  index % 2 == 0 ? "bg-[#10141c]" : "bg-[#2c374d]"
-                }
+                    index % 2 == 0 ? "bg-[#10141c]" : "bg-[#2c374d]"
+                  }
             `}
-              >
-                <div className="col-span-2 ml-2">{transaction.id}</div>
-                {transaction.creditedAccount == ownerAccount?.accountId && (
-                  <>
-                    <div>{transaction.creditedUser}</div>
-                    <div>{transaction.debitedUser}</div>
-                  </>
-                )}
-                {transaction.debitedAccount == ownerAccount?.accountId && (
-                  <>
-                    <div>{transaction.creditedUser}</div>
-                    <div>{transaction.debitedUser}</div>
-                  </>
-                )}
-                <div>{formatDate(String(transaction.createdAt))}</div>
-                <div>{formatAmount(transaction.value)}</div>
-              </div>
-            ))
+                >
+                  <div className="col-span-2 ml-2">{transaction.id}</div>
+                  {transaction.creditedAccount == ownerAccount?.accountId && (
+                    <>
+                      <div>{transaction.creditedUser}</div>
+                      <div>{transaction.debitedUser}</div>
+                    </>
+                  )}
+                  {transaction.debitedAccount == ownerAccount?.accountId && (
+                    <>
+                      <div>{transaction.creditedUser}</div>
+                      <div>{transaction.debitedUser}</div>
+                    </>
+                  )}
+                  <div>{formatDate(String(transaction.createdAt))}</div>
+                  <div>{formatAmount(transaction.value)}</div>
+                </div>
+              )
+            )
           : null}
       </div>
       <div className="">
@@ -300,12 +233,30 @@ export default function Transactions() {
         </div>
         <Form />
         <Filters />
-        {/* <Pagination
-          total={limit}
-          perPage={limit}
-          onPageClick={() => {}}
-        /> */}
-        <Pagination />
+        <div className="">
+          {transactions?.attributes.length > 0 && (
+            <Pagination
+              total={transactions?.pagination?.total}
+              perPage={limit}
+              onPageClick={(page) => setPageIndex(page)}
+            />
+          )}
+          <div className="flex flex-col ml-2 mb-2">
+            <span className="w-24">Limit</span>
+            <select
+              className="indent-2 w-24 bg-[#2b2e46] rounded-md"
+              defaultValue={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPageIndex(1);
+              }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+            </select>
+          </div>
+        </div>
       </div>
     </Container>
   );

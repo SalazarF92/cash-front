@@ -1,4 +1,5 @@
 import { errorMessages } from "@/helpers/messages";
+import { IApiResponse } from "@/interfaces/api";
 import { ITransaction } from "@/interfaces/transaction";
 import { get, post } from "./api";
 
@@ -10,11 +11,14 @@ interface Filter {
 
 class TransactionService {
   async get(type: string, query: Filter) {
-    const { data } = await get<ITransaction[]>(
+    const result = await get<{
+      attributes: ITransaction[];
+      pagination: { limit: number; total: number };
+    }>(
       `/transaction/list?type=${type}`,
       query
     );
-    return data as ITransaction[];
+    return result?.data
   }
 
   async create(
