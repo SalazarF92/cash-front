@@ -19,6 +19,7 @@
     "cookies-next": "^2.1.1",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.4",
+    "iconoir-react": "^5.4.1",
     "jwt-decode": "^3.1.2",
     "next": "13.0.4",
     "nookies": "^2.5.2",

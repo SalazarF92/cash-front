@@ -5,6 +5,7 @@ import { getCookie, setCookie, deleteCookie } from "cookies-next";
 import { errorMessages } from "@/helpers/messages";
 
 class AuthService {
+  
   async create(username: string, password: string) {
     try {
       const { data } = await post("/user/create", { username, password });

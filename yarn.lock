@@ -1508,6 +1508,11 @@ hoist-non-react-statics@^3.0.0, hoist-non-react-statics@^3.3.0:
   dependencies:
     react-is "^16.7.0"
 
+iconoir-react@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/iconoir-react/-/iconoir-react-5.4.1.tgz#54152595d0f0618d0532ac651475369c43b7a395"
+  integrity sha512-V6lqNPZyg2sadA5HYnU+XYflnKP55lJJW3GmGepCY18ANL0vY8k2EuEwosHVFCKPGaxa+ZEGLOcyGhgfJHJ0Og==
+
 ignore@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.0.tgz#6d3bac8fa7fe0d45d9f9be7bac2fc279577e345a"

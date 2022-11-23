@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PRIVATE_ROUTES = ["/transfer", "/transactions"];
+const PRIVATE_ROUTES = ["/transactions", "/"];
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("token");

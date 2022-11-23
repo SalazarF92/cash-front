@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import Pagination from "@/components/Pagination";
 import { formatAmount, formatDate, sortByDate } from "@/helpers/utils";
 import { accountService } from "@/services/account";
 import { authService } from "@/services/auth";
@@ -6,6 +7,7 @@ import { transactionService } from "@/services/transaction";
 import { useQueries } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { ArrowLeft, ArrowRight } from "iconoir-react";
 
 const Container = styled.div`
   grid-template-columns: minmax(0, 1fr);
@@ -26,12 +28,15 @@ export default function Transactions() {
   const [disable, setDisable] = useState(false);
   const [messages, setMessages] = useState([]);
   const [order, setOrder] = useState("asc");
+  const [pageIndex, setPageIndex] = useState(1);
+  const [limit, setLimit] = useState(5);
 
   const results = useQueries({
     queries: [
       {
-        queryKey: ["transactions", [type, order]],
-        queryFn: () => transactionService.get(type),
+        queryKey: ["transactions", [type, order, pageIndex, limit]],
+        queryFn: () =>
+          transactionService.get(type, { offset: pageIndex, limit }),
       },
       {
         queryKey: ["accounts", 2],
@@ -43,6 +48,10 @@ export default function Transactions() {
       },
     ],
   });
+
+  useEffect(() => {
+    console.log(pageIndex);
+  }, [pageIndex]);
 
   const transactions = results[0]?.data;
   const ownerAccount = results[2]?.data;
@@ -72,7 +81,7 @@ export default function Transactions() {
   const Form = () => {
     return (
       <form onSubmit={submit}>
-        <div className="grid p-2">
+        <div className="grid p-2 mt-2">
           <span className="text-xl text-center mb-2">Transfer</span>
           <div className="grid grid-cols-3 gap-5">
             <label className="block col-span-2 text-gray-200 text-sm font-bold ">
@@ -134,7 +143,7 @@ export default function Transactions() {
 
   const Filters = () => {
     return (
-      <div className="grid p-2">
+      <div className="grid p-2 mt-8">
         <span className="text-center text-xl mb-2">Filter By</span>
         <div className="grid grid-cols-2 gap-5">
           <span className="">Transaction Type</span>
@@ -157,6 +166,69 @@ export default function Transactions() {
           >
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+    );
+  };
+
+  const Pagination = () => {
+    const pages =
+      transactions?.length % limit == 0
+        ? Math.ceil(transactions?.length / limit)
+        : Math.floor(transactions?.length / limit) + 1;
+    const buttons = [];
+    for (let i = 1; i <= pages; i++) {
+      buttons.push(i);
+    }
+    console.log(transactions?.length);
+    console.log(buttons);
+    return (
+      <div className="grid p-2 mt-8">
+        <span className="text-center text-xl mb-2">Pagination</span>
+        <div className="w-full flex flex-col gap-5">
+          <span className="">Page</span>
+          <div className="flex w-full justify-around">
+            <ArrowLeft
+              className="cursor-pointer"
+              onClick={() =>
+                pageIndex > 1 ? setPageIndex(pageIndex - 1) : null
+              }
+            />
+            {buttons.map((button, index) =>
+              button + 1 >= pageIndex && button <= pageIndex + 1 ? (
+                <button
+                  key={index}
+                  onClick={() => setPageIndex(button)}
+                  className={`${
+                    button == pageIndex
+                      ? "bg-[#2b2e46] text-blue-500"
+                      : "bg-[#2b2e46] text-gray-500"
+                  } rounded-md w-24`}
+                >
+                  {button}
+                </button>
+              ) : null
+            )}
+            <ArrowRight
+              className="cursor-pointer"
+              onClick={() => {
+                pageIndex <= buttons.length - 1
+                  ? setPageIndex(pageIndex + 1)
+                  : null;
+                console.log("numbers", pageIndex, buttons.length);
+              }}
+            />
+          </div>
+          <span className="w-24">Limit</span>
+          <select
+            className="indent-2 w-24 bg-[#2b2e46] rounded-md"
+            defaultValue={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
           </select>
         </div>
       </div>
@@ -228,6 +300,12 @@ export default function Transactions() {
         </div>
         <Form />
         <Filters />
+        {/* <Pagination
+          total={limit}
+          perPage={limit}
+          onPageClick={() => {}}
+        /> */}
+        <Pagination />
       </div>
     </Container>
   );

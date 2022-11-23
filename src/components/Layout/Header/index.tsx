@@ -8,8 +8,13 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-const token = authService.getToken();
+
 export default function Header() {
+  async function isLogged() {
+    const user = await authService.me();
+    return user.accountId
+  }
+
   async function logout() {
     await authService.logout();
     window.location.reload();
@@ -26,7 +31,7 @@ export default function Header() {
           alt="logo"
         />
       </div>
-      {token ? (
+      {isLogged() ? (
         <button
           className="text-xl hover:underline hover:text-blue-600 mr-3"
           onClick={logout}
