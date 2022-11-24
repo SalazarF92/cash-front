@@ -11,7 +11,8 @@ const Container = styled.div`
 `;
 
 export default function Header() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isLogged, logout } = useAuth();
+
 
   return (
     <Container className="">
@@ -24,7 +25,7 @@ export default function Header() {
           alt="logo"
         />
       </div>
-      {isAuthenticated ? (
+      {isLogged() ? (
         <button
           className="text-xl hover:underline hover:text-blue-600 mr-3"
           onClick={logout}

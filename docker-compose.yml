@@ -1,0 +1,16 @@
+version: '3'
+
+services: 
+  ngcash-frontend:
+    container_name: ngcash-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start
+    ports: 
+        - "3002:3002"
+networks:
+  api-net:
+
+
+

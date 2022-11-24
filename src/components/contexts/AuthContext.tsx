@@ -6,7 +6,7 @@ type AuthContextData = {
   login: (username: string, password: string) => Promise<any>;
   logout: () => void;
   me: () => void;
-  setIsAuthenticated: (isAuthenticated: boolean) => void;
+  isLogged: () => boolean;
 };
 
 const AuthContext = createContext({} as AuthContextData);
@@ -26,13 +26,18 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.reload();
   }
 
+  function isLogged() {
+    authService.getToken() ? setIsAuthenticated(true) : setIsAuthenticated(false);
+    return isAuthenticated;
+  }
+
   function me() {
     isAuthenticated ? authService.me() : null;
   }
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, setIsAuthenticated, login, logout, me }}
+      value={{ isAuthenticated, login, logout, me, isLogged }}
     >
       {children}
     </AuthContext.Provider>

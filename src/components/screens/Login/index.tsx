@@ -68,6 +68,7 @@ export default function Login() {
         return;
       }
       setRegister(false);
+      setMessages(null)
       return;
     }
     const data = await login(username, password);
