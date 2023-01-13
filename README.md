@@ -24,7 +24,7 @@ Running the project is as simple as running the command 'docker-compose up', whi
 For more informations about the backend, access the link below in Links section.
 
 
-**Background in:** Nodejs, Nextjs
+**Background in:** Nodejs, Nextjs, React Query
 
 **Links:**
 * [LinkedIn](https://www.linkedin.com/in/flavio-r-salazar)
